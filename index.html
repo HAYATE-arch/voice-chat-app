@@ -11,84 +11,58 @@
       padding: 0;
       background: linear-gradient(135deg, #f06, #f79);
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden; /* 画面外にスクロールしないようにする */
     }
-
     .chat-container {
       width: 100%;
       max-width: 500px;
       background: white;
       border-radius: 10px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       height: 100%;
-      padding-top: 80px; /* 固定されたヘッダーを下げる */
     }
-
     .chat-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
       background: #3b5998;
       color: white;
       padding: 10px;
       font-size: 1.2em;
       text-align: center;
-      z-index: 10; /* 他の要素の上に表示 */
+      flex-shrink: 0; /* ヘッダーの高さは変えない */
     }
-
     .chat-body {
-      padding: 20px;
+      padding: 10px;
       flex-grow: 1;
       overflow-y: auto;
       background: #f9f9f9;
-      margin-top: 60px; /* タイトルが固定されているため、その下に余白を確保 */
-      scroll-behavior: smooth; /* スクロールを滑らかにする */
-      transition: opacity 0.5s ease; /* チャットが表示されるときの滑らかなフェードイン */
+      margin-bottom: 10px;
     }
-
     .message {
       margin: 10px 0;
       padding: 10px;
       border-radius: 8px;
       max-width: 70%;
       word-wrap: break-word;
-      opacity: 0; /* メッセージが追加されるときにフェードインする */
-      animation: fadeIn 0.5s forwards; /* アニメーションの追加 */
     }
-
     .me {
       background: #cce5ff;
       margin-left: auto;
       text-align: right;
     }
-
     .other {
       background: #d4edda;
       text-align: left;
     }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
     .message-input {
       display: flex;
       padding: 10px;
       background: white;
       border-top: 1px solid #ddd;
     }
-
     .message-input input {
       flex: 1;
       padding: 12px;
@@ -97,13 +71,7 @@
       font-size: 1.1em;
       margin-right: 10px;
       outline: none;
-      transition: all 0.3s ease; /* 滑らかな入力ボックスの変更 */
     }
-
-    .message-input input:focus {
-      border-color: #3b5998;
-    }
-
     .message-input button {
       padding: 12px;
       border: none;
@@ -113,25 +81,18 @@
       font-size: 1.2em;
       cursor: pointer;
       margin-left: 5px;
-      transition: background-color 0.3s ease; /* ボタンの背景色の滑らかな変更 */
     }
-
     .message-input button:hover {
       background-color: #2d4373;
     }
-
     .voice-buttons {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 10px;
-      background: white;
       display: flex;
       justify-content: space-between;
-      z-index: 10; /* 他の要素の上に表示 */
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ddd;
+      flex-shrink: 0; /* ボタンの高さは変えない */
     }
-
     .voice-buttons button {
       background-color: #28a745;
       color: white;
@@ -142,13 +103,10 @@
       cursor: pointer;
       flex: 1;
       margin: 0 5px;
-      transition: background-color 0.3s ease; /* ボタンの背景色の滑らかな変更 */
     }
-
     .voice-buttons button:hover {
       background-color: #218838;
     }
-
     @media (max-width: 600px) {
       .chat-container {
         width: 100%;
@@ -182,11 +140,10 @@
       <button onclick="sendText()">送信</button>
       <button onclick="clearInput()">クリア</button>
     </div>
-  </div>
-
-  <div class="voice-buttons">
-    <button onclick="startRecognition()">音声入力開始</button>
-    <button onclick="stopRecognition()">音声入力停止</button>
+    <div class="voice-buttons">
+      <button onclick="startRecognition()">音声入力開始</button>
+      <button onclick="stopRecognition()">音声入力停止</button>
+    </div>
   </div>
 
   <script>
@@ -199,7 +156,7 @@
       div.className = 'message ' + (isMe ? 'me' : 'other');
       div.textContent = text;
       chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight; // 常に最新メッセージが表示されるようにスクロール
+      chat.scrollTop = chat.scrollHeight;
     }
 
     function sendText() {
