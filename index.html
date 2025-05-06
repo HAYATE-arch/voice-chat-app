@@ -2,76 +2,279 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>音声チャットデモ</title>
+  <title>音声チャットアプリ</title>
   <style>
-    body { font-family: sans-serif; padding: 1em; }
-    .message { margin: 0.5em 0; }
-    .me { text-align: right; color: blue; }
-    .other { text-align: left; color: green; }
-    button { margin: 0.5em; padding: 0.5em; }
-  </style>
-</head>
-<body>
-  <h1>音声・テキストチャット</h1>
-  <div id="chat"></div>
-
-  <input type="text" id="textInput" placeholder="入力..." />
-  <button onclick="sendText()">送信</button>
-
-  <br/>
-  <button onclick="startRecognition()">音声入力開始</button>
-  <button onclick="stopRecognition()">音声入力停止</button>
-
-  <script>
-    const chat = document.getElementById('chat');
-    const textInput = document.getElementById('textInput');
-
-    function appendMessage(text, isMe) {
-      const div = document.createElement('div');
-      div.className = 'message ' + (isMe ? 'me' : 'other');
-      div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+    /* 共通のスタイル */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    function sendText() {
-      const text = textInput.value.trim();
-      if (text) {
-        appendMessage(text, true);
-        textInput.value = '';
+    /* 上部の反転したテキスト */
+    .instruction-text {
+      font-size: 18px;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 30px;
+      transform: rotate(180deg);
+      text-align: center;
+      max-width: 100%;
+      word-wrap: break-word;
+      padding: 10px;
+    }
+
+    /* チャットコンテナ */
+    .chat-container {
+      width: 100%;
+      max-width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    /* チャットボックスのスタイル */
+    .chat-box-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      height: 60vh; /* 高さを指定してモバイルでも快適に使えるように */
+      overflow-y: auto;
+    }
+
+    .chat-box {
+      border-radius: 12px;
+      padding: 15px;
+      background-color: #f7f7f7;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      height: 100%;
+    }
+
+    .chat-box-left {
+      transform: rotate(180deg);
+    }
+
+    .msg {
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin: 5px 0;
+      max-width: 85%;
+      word-wrap: break-word;
+    }
+
+    .self {
+      background-color: #dcfce7;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .other {
+      background-color: #e0f2fe;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+
+    /* 入力エリア */
+    #inputArea {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      resize: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ボタンのスタイル */
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      background-color: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* アクティブ状態のマイクボタン */
+    .mic-active {
+      background-color: #f87171 !important;
+    }
+
+    /* スマホ向けのレスポンシブ調整 */
+    @media (max-width: 768px) {
+      /* チャットボックスの高さを調整 */
+      .chat-box-container {
+        height: 50vh;
+      }
+
+      .buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      textarea {
+        font-size: 14px;
+        height: 60px;
       }
     }
 
-    // 音声認識機能
-    let recognition;
-    if ('webkitSpeechRecognition' in window) {
-      recognition = new webkitSpeechRecognition();
-      recognition.lang = 'ja-JP';
-      recognition.continuous = true;
-      recognition.interimResults = true;
+    /* スクロール可能エリアを確保 */
+    .chat-box-container {
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
 
-      recognition.onresult = function(event) {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            transcript += event.results[i][0].transcript;
-          }
-        }
-        if (transcript) {
-          appendMessage(transcript, false);
-        }
-      };
-    } else {
-      alert("このブラウザは音声認識に対応していません。");
+  <!-- 上部の反転したテキスト -->
+  <div class="instruction-text">
+    音声を文字お越ししています。伝えたい内容を声に出してお伝えください。
+  </div>
+
+  <div class="chat-container">
+    <h2>音声チャットアプリ</h2>
+
+    <!-- チャットボックスエリア -->
+    <div class="chat-box-container">
+      <!-- 右側のチャット（通常の会話） -->
+      <div id="chat-right" class="chat-box"></div>
+      <!-- 左側のチャット（上下反転した会話） -->
+      <div id="chat-left" class="chat-box chat-box-left"></div>
+    </div>
+
+    <!-- 入力エリア -->
+    <div id="inputArea">
+      <textarea id="chatInput" placeholder="メッセージを入力..."></textarea>
+      <div class="buttons">
+        <button onclick="sendMessage()">送信</button>
+        <button id="startBtn" onclick="startRecognition()">🎙️ 開始</button>
+        <button onclick="stopRecognition()">🛑 終了</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chatRight = document.getElementById('chat-right');
+    const chatLeft = document.getElementById('chat-left');
+    const inputBox = document.getElementById('chatInput');
+    const startBtn = document.getElementById('startBtn');
+    let recognition;
+    let recognizing = false;
+
+    function sendMessage() {
+      const text = inputBox.value.trim();
+      if (text !== "") {
+        appendMessage("自分", text, "self", "right");
+        appendMessage("自分", text, "self", "left");
+        inputBox.value = "";
+      }
+    }
+
+    function appendMessage(sender, text, className, side) {
+      const div = document.createElement('div');
+      div.className = `msg ${className}`;
+      div.textContent = `${sender}: ${text}`;
+
+      if (side === "right") {
+        chatRight.appendChild(div);
+        chatRight.scrollTop = chatRight.scrollHeight;
+      } else {
+        chatLeft.appendChild(div);
+        chatLeft.scrollTop = chatLeft.scrollHeight;
+      }
     }
 
     function startRecognition() {
-      if (recognition) recognition.start();
+      if (recognizing) return;
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'ja-JP';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const transcript = event.results[i][0].transcript.trim();
+            if (transcript !== "") {
+              appendMessage("相手", transcript, "other", "right");
+              appendMessage("相手", transcript, "other", "left");
+            }
+          }
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("音声認識エラー:", event.error);
+      };
+
+      recognition.onend = () => {
+        if (recognizing) {
+          recognition.start();
+        }
+      };
+
+      recognition.start();
+      recognizing = true;
+      startBtn.classList.add("mic-active");
     }
 
     function stopRecognition() {
-      if (recognition) recognition.stop();
+      if (recognition && recognizing) {
+        recognizing = false;
+        recognition.stop();
+        startBtn.classList.remove("mic-active");
+      }
     }
   </script>
+
 </body>
 </html>
