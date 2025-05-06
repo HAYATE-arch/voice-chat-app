@@ -48,6 +48,8 @@
       overflow-y: auto;
       background: #f9f9f9;
       margin-top: 60px; /* タイトルが固定されているため、その下に余白を確保 */
+      scroll-behavior: smooth; /* スクロールを滑らかにする */
+      transition: opacity 0.5s ease; /* チャットが表示されるときの滑らかなフェードイン */
     }
 
     .message {
@@ -56,15 +58,28 @@
       border-radius: 8px;
       max-width: 70%;
       word-wrap: break-word;
+      opacity: 0; /* メッセージが追加されるときにフェードインする */
+      animation: fadeIn 0.5s forwards; /* アニメーションの追加 */
     }
+
     .me {
       background: #cce5ff;
       margin-left: auto;
       text-align: right;
     }
+
     .other {
       background: #d4edda;
       text-align: left;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     .message-input {
@@ -82,6 +97,11 @@
       font-size: 1.1em;
       margin-right: 10px;
       outline: none;
+      transition: all 0.3s ease; /* 滑らかな入力ボックスの変更 */
+    }
+
+    .message-input input:focus {
+      border-color: #3b5998;
     }
 
     .message-input button {
@@ -93,6 +113,7 @@
       font-size: 1.2em;
       cursor: pointer;
       margin-left: 5px;
+      transition: background-color 0.3s ease; /* ボタンの背景色の滑らかな変更 */
     }
 
     .message-input button:hover {
@@ -121,6 +142,7 @@
       cursor: pointer;
       flex: 1;
       margin: 0 5px;
+      transition: background-color 0.3s ease; /* ボタンの背景色の滑らかな変更 */
     }
 
     .voice-buttons button:hover {
@@ -177,7 +199,7 @@
       div.className = 'message ' + (isMe ? 'me' : 'other');
       div.textContent = text;
       chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      chat.scrollTop = chat.scrollHeight; // 常に最新メッセージが表示されるようにスクロール
     }
 
     function sendText() {
