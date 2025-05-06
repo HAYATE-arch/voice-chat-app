@@ -11,10 +11,11 @@
       padding: 0;
       background: linear-gradient(135deg, #f06, #f79);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       height: 100vh;
     }
+
     .chat-container {
       width: 100%;
       max-width: 500px;
@@ -24,21 +25,31 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: 90%;
+      height: 100%;
+      padding-top: 80px; /* 固定されたヘッダーを下げる */
     }
+
     .chat-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
       background: #3b5998;
       color: white;
       padding: 10px;
       font-size: 1.2em;
       text-align: center;
+      z-index: 10; /* 他の要素の上に表示 */
     }
+
     .chat-body {
       padding: 20px;
       flex-grow: 1;
       overflow-y: auto;
       background: #f9f9f9;
+      margin-top: 60px; /* タイトルが固定されているため、その下に余白を確保 */
     }
+
     .message {
       margin: 10px 0;
       padding: 10px;
@@ -55,12 +66,14 @@
       background: #d4edda;
       text-align: left;
     }
+
     .message-input {
       display: flex;
       padding: 10px;
       background: white;
       border-top: 1px solid #ddd;
     }
+
     .message-input input {
       flex: 1;
       padding: 12px;
@@ -70,6 +83,7 @@
       margin-right: 10px;
       outline: none;
     }
+
     .message-input button {
       padding: 12px;
       border: none;
@@ -80,16 +94,23 @@
       cursor: pointer;
       margin-left: 5px;
     }
+
     .message-input button:hover {
       background-color: #2d4373;
     }
+
     .voice-buttons {
-      display: flex;
-      justify-content: space-between;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       padding: 10px;
       background: white;
-      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      z-index: 10; /* 他の要素の上に表示 */
     }
+
     .voice-buttons button {
       background-color: #28a745;
       color: white;
@@ -101,9 +122,11 @@
       flex: 1;
       margin: 0 5px;
     }
+
     .voice-buttons button:hover {
       background-color: #218838;
     }
+
     @media (max-width: 600px) {
       .chat-container {
         width: 100%;
@@ -137,10 +160,11 @@
       <button onclick="sendText()">送信</button>
       <button onclick="clearInput()">クリア</button>
     </div>
-    <div class="voice-buttons">
-      <button onclick="startRecognition()">音声入力開始</button>
-      <button onclick="stopRecognition()">音声入力停止</button>
-    </div>
+  </div>
+
+  <div class="voice-buttons">
+    <button onclick="startRecognition()">音声入力開始</button>
+    <button onclick="stopRecognition()">音声入力停止</button>
   </div>
 
   <script>
